@@ -1,7 +1,8 @@
-import object_detection_api
+# import object_detection_api
+import faceDetector
 import os
 from PIL import Image
-from flask import Flask, request, Response
+from flask import Flask, request, Response,jsonify
 
 app = Flask(__name__)
 
@@ -28,20 +29,47 @@ def local():
 def remote():
     return Response(open('./static/video.html').read(), mimetype="text/html")
 
+# @app.route('/test')
+# def test():
+#     PATH_TO_TEST_IMAGES_DIR = 'object_detection/test_images'  # cwh
+#     TEST_IMAGE_PATHS = [os.path.join(PATH_TO_TEST_IMAGES_DIR, 'image{}.jpg'.format(i)) for i in range(1, 3)]
+#
+#     image = Image.open(TEST_IMAGE_PATHS[0])
+#     objects = object_detection_api.get_objects(image)
+#
+#     return objects
 
-@app.route('/test')
-def test():
-    PATH_TO_TEST_IMAGES_DIR = 'object_detection/test_images'  # cwh
-    TEST_IMAGE_PATHS = [os.path.join(PATH_TO_TEST_IMAGES_DIR, 'image{}.jpg'.format(i)) for i in range(1, 3)]
 
-    image = Image.open(TEST_IMAGE_PATHS[0])
-    objects = object_detection_api.get_objects(image)
+# @app.route('/image', methods=['POST'])
+# def image():
+#     try:
+#         image_file = request.files['image']  # get the image
+#
+#         # Set an image confidence threshold value to limit returned data
+#         threshold = request.form.get('threshold')
+#         if threshold is None:
+#             threshold = 0.5
+#         else:
+#             threshold = float(threshold)
+#
+#         # finally run the image through tensor flow object detection`
+#         image_object = Image.open(image_file)
+#         objects = object_detection_api.get_objects(image_object, threshold)
+#         return objects
+#
+#     except Exception as e:
+#         print('POST /image error: %e' % e)
+#         return e
 
-    return objects
+@app.route('/image/check')
+def check():
+    objects = faceDetector.faceDetect(["test_images/2007_007763.jpg"])
+    print objects
+    return jsonify(objects)
 
-
-@app.route('/image', methods=['POST'])
-def image():
+@app.route('/image/faceDetect', methods=['POST'])
+def image_face():
+    print(">> Finding faces")
     try:
         image_file = request.files['image']  # get the image
 
@@ -54,17 +82,21 @@ def image():
 
         # finally run the image through tensor flow object detection`
         image_object = Image.open(image_file)
-        objects = object_detection_api.get_objects(image_object, threshold)
-        return objects
+        objects = faceDetector.faceDetect(["test_images/2007_007763.jpg"])
+        print objects
+
+        return jsonify(objects)
 
     except Exception as e:
         print('POST /image error: %e' % e)
         return e
 
 
+
+
 if __name__ == '__main__':
 	# without SSL
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0',port=000)
 
 	# with SSL
     #app.run(debug=True, host='0.0.0.0', ssl_context=('ssl/server.crt', 'ssl/server.key'))

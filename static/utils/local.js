@@ -15,4 +15,4 @@ navigator.mediaDevices.getUserMedia(constraints)
     })
     .catch(err => {
         console.log('navigator.getUserMedia error: ', err)
-    });
+  });
